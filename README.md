@@ -2,6 +2,7 @@
 Demo Sphinx project for CW WCRN
 
 **Description:**
+
   | The HABS nowcast and forecast model uses satellite and modeled environmental data to forecast the probability of a harmful algal bloom event along the west coast the the US. This documentation covers the coding for the CoastWatch portion of the project, which covers the following steps:
   * downloading NASA MODIS L2 data;
   * extracting chlorophyll a, rf488 nm, and rf555 nm bands;
