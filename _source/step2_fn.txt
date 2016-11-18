@@ -1,0 +1,5 @@
+SEADAS-Based Functions Documentation
+====================================
+
+.. automodule:: seadas_scripts
+   :members: 

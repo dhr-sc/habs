@@ -1,0 +1,30 @@
+.. HABS Forecast Model documentation master file, created by
+   sphinx-quickstart on Thu Apr 14 13:08:59 2016.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+HABS Forecast Model's Documentation
+===============================================
+The HABS nowcast and forecast model uses satellite and modeled environmental data to forecast the probability of a harmful algal bloom event along the west coast the the US. This documentation covers the coding for the CoastWatch portion of the project, which covers the following steps: 
+
+* downloading NASA MODIS L2 data;
+* extracting chlorophyll a, rf488 nm, and rf555 nm bands;
+* gridding the data binning them into daily composite;
+* compiling 180 days of data for each band and filling in missing data with DINEOF;
+* downsampling the data to the ROMS model resolution and writing to a netCDF4 file.  
+
+
+**Contents:**
+
+.. toctree::
+   :maxdepth: 3
+
+   Satellite Data Processing <hab_project>
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
