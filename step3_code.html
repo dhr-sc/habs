@@ -1,0 +1,359 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>EOF Gap-Filling Script Code &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="EOF Gap-Filling Accessory Modules Documentation" href="step3_fn.html" />
+    <link rel="prev" title="EOF Gap-Filling Script Documentation" href="step3__codedoc_fn.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_fn.html" title="EOF Gap-Filling Accessory Modules Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step3__codedoc_fn.html" title="EOF Gap-Filling Script Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="eof-gap-filling-script-code">
+<h1>EOF Gap-Filling Script Code<a class="headerlink" href="#eof-gap-filling-script-code" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;**EOF gap filling script for HABS satellite data**</span>
+<span class="sd">     </span>
+<span class="sd">**Description**</span>
+<span class="sd">	| Main script to process HABS satellite data for use in the HABS NowCast model.</span>
+<span class="sd">	| The body of the script:</span>
+<span class="sd">	</span>
+<span class="sd">	* Imports the python and custom modules</span>
+<span class="sd">	* Sets the directory paths</span>
+<span class="sd">	* Sets the date objects</span>
+<span class="sd">	</span>
+<span class="sd">	The main() function:</span>
+<span class="sd">	</span>
+<span class="sd">	* Assembles satellite data for the DINEOF runs</span>
+<span class="sd">	* Runs DINEOF gap filling</span>
+<span class="sd">	* Downsamples the filled data to ROMS resolution</span>
+<span class="sd">	* Saves the data as netCDF4, puts a copy in a web-accessible location, and archives the data.  </span>
+<span class="sd">	</span>
+<span class="sd">**Usage**</span>
+<span class="sd">	python filled_satellite_data DATA_DIR EOF_WORK_DIR EOF_DIR BIN_DIR EOF_DATA_DIR PYTHON_DIR LOG_DIR</span>
+
+<span class="sd">**Args**</span>
+
+<span class="sd">	* DATA_DIR: location of satellite data directory</span>
+<span class="sd">	* EOF_WORK_DIR: location of work directory</span>
+<span class="sd">	* EOF_DIR: location of DINEOF software</span>
+<span class="sd">	* BIN_DIR: location of python and dineof scripts</span>
+<span class="sd">	* EOF_DATA_DIR: location of</span>
+<span class="sd">	* PYTHON_DIR LOG_DIR: location of python</span>
+
+<span class="sd">**Development software versions**</span>
+<span class="sd">    | Mac OSX, version 10.11.3</span>
+<span class="sd">    | Python 2.7.11 :: Anaconda 2.4.0</span>
+
+<span class="sd">**Python module dependencies**</span>
+
+<span class="sd">    * datetime</span>
+<span class="sd">    * time</span>
+<span class="sd">    * numpy</span>
+<span class="sd">    * os</span>
+<span class="sd">    * pydap</span>
+<span class="sd">    * sys</span>
+
+<span class="sd">**Python library dependencies**</span>
+<span class="sd">	* habs_lib_prenowcast.get_bands_4</span>
+<span class="sd">	* habs_lib_prenowcast.geteofdata</span>
+<span class="sd">	* habs_lib_prenowcast.downsample</span>
+<span class="sd">	* habs_lib_prenowcast.write_filled_nc</span>
+<span class="sd">	* habs_lib_prenowcast.netcdfwrite</span>
+<span class="sd">	</span>
+<span class="sd">**Creator**</span>
+<span class="sd">    Dale Robinson, CoastWatch WCRN</span>
+
+<span class="sd">**History**</span>
+<span class="sd">    | Modified Nov. 2015 from a script by Fred Barr (CeNCOOS) </span>
+<span class="sd">    | Modified for new (mini) server March 2016</span>
+<span class="sd">    | Added Sphinx documentation April 2016</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pydap.client</span> <span class="kn">import</span> <span class="n">open_url</span>
+<span class="kn">from</span> <span class="nn">pydap.exceptions</span> <span class="kn">import</span> <span class="n">ServerError</span>
+<span class="c1">#import matplotlib</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">habs_lib_prenowcast</span> <span class="kn">import</span> <span class="n">get_bands_4</span>
+<span class="kn">from</span> <span class="nn">habs_lib_prenowcast</span> <span class="kn">import</span> <span class="n">geteofdata</span>
+<span class="kn">from</span> <span class="nn">habs_lib_prenowcast</span> <span class="kn">import</span> <span class="n">downsample</span>
+<span class="kn">from</span> <span class="nn">habs_lib_prenowcast</span> <span class="kn">import</span> <span class="n">write_filled_nc</span>
+<span class="kn">from</span> <span class="nn">habs_lib_prenowcast</span> <span class="kn">import</span> <span class="n">netcdfwrite</span>
+
+
+<span class="c1"># matplotlib.use(&#39;Agg&#39;)</span>
+
+<span class="k">print</span> <span class="s1">&#39;START PRE-NOWCAST SCRIPT&#39;</span>
+
+<span class="c1"># set directory paths</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">EOF_WORK_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">EOF_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">BIN_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">EOF_DATA_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">PYTHON_DIR</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+
+<span class="c1"># set url for ROMS</span>
+<span class="n">URL_START</span> <span class="o">=</span> <span class="s2">&quot;http://west.rssoffice.com:8080/thredds/dodsC&quot;</span>
+<span class="n">URL_AREA</span> <span class="o">=</span> <span class="s2">&quot;pacific/CA3km-nowcast/CA&quot;</span>
+<span class="n">URL_end</span> <span class="o">=</span> <span class="s2">&quot;ca_subCA_das_</span><span class="si">%d%2.2d%2.2d</span><span class="s2">03.nc&quot;</span>
+
+<span class="c1"># set today&#39;s local date</span>
+<span class="c1">##now = datetime.now()  # UNCOMMENT this WHEN THESTING IS DONE</span>
+<span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2016</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">)</span>  <span class="c1">#USE THIS FOR TESTING</span>
+
+<span class="n">myyesterday</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span>
+
+<span class="c1"># set today&#39;s year,  month and day</span>
+<span class="n">year</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">year</span>
+<span class="n">month</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">month</span>
+<span class="n">day</span> <span class="o">=</span> <span class="n">now</span><span class="o">.</span><span class="n">day</span>
+<span class="c1"># get seconds since epoch</span>
+<span class="n">zstart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    
+    <span class="sd">&quot;&quot;&quot;**Main function for EOF gap filling script**</span>
+<span class="sd">     </span>
+<span class="sd">    **Description**</span>
+<span class="sd">        The main function has 4 major steps:</span>
+<span class="sd">        </span>
+<span class="sd">        #. **Data Assembly**: The script assembles chlorophyll, rf488, and rf555 data for the last 180 days and saves them into separate netCDF3 file along with a land mask. </span>
+<span class="sd">        #. **DINEOF Gap Filling**: A DINEOF is run on the chlorophyll, rf488, and rf555 data stored in the netCDF3 file and the filled data fields are added as new variables to the netCDF3 files.</span>
+<span class="sd">        #. **Downsampling**: The filled fields from the netCDF files are loaded, downsampled to ROMS resolution, and stored together in a new netCDF4 file. </span>
+<span class="sd">        #. **Distribution**:The netCDF4 file is make available online for further processing.</span>
+<span class="sd">    </span>
+<span class="sd">    **Outputs**</span>
+<span class="sd">        * final product - netCDF4 file with 180 days of filled chlorophyll, rf488, and rf555 data fields</span>
+<span class="sd">        * intermediate products</span>
+<span class="sd">            | L2b gridded daily files containing raw chlorophyll, rf488, and rf555 data</span>
+<span class="sd">            | L3 gridded daily files for each band</span>
+<span class="sd">            | netCFD3 file containing raw and filled chlorophyll, rf488, and rf555 data fields and land mask       </span>
+<span class="sd">	</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">print</span> <span class="s1">&#39;START Get lat and lon grid from ROMS nowcast&#39;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="n">rssurl</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">URL_START</span><span class="p">,</span> <span class="n">URL_AREA</span><span class="p">,</span> <span class="n">URL_end</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">year</span><span class="p">,</span>  <span class="n">now</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>  <span class="n">now</span><span class="o">.</span><span class="n">day</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">rssurl</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">modeldata</span> <span class="o">=</span> <span class="n">open_url</span><span class="p">(</span><span class="n">rssurl</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s2">&quot;Model opened&quot;</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t open model, IOError&quot;</span>
+        <span class="n">quit</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">ServerError</span><span class="p">:</span>
+        <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="s2">&quot;No model today error 404. Try yesterday&quot;</span>
+        <span class="c1"># lets try the previous day</span>
+        <span class="n">myold</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">fromordinal</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">myyesterday</span><span class="p">))</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="n">myold</span><span class="o">.</span><span class="n">day</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="n">myold</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="n">myold</span><span class="o">.</span><span class="n">month</span>
+        <span class="n">rssurl</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">URL_START</span><span class="p">,</span> <span class="n">URL_AREA</span><span class="p">,</span> <span class="n">URL_end</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">year</span><span class="p">,</span>  <span class="n">month</span><span class="p">,</span>  <span class="n">day</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">modeldata</span> <span class="o">=</span> <span class="n">open_url</span><span class="p">(</span><span class="n">rssurl</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="s2">&quot;Cant open model, IOError&quot;</span>
+            <span class="n">quit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ServerError</span><span class="p">:</span>
+            <span class="k">print</span> <span class="o">&gt;&gt;</span> <span class="n">sys</span>
+    <span class="c1"># Set up and fill model lat and lon vectors</span>
+    <span class="n">latm</span> <span class="o">=</span> <span class="n">modeldata</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span>
+    <span class="n">lonm</span> <span class="o">=</span> <span class="n">modeldata</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span>
+    <span class="n">mylatm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">latm</span><span class="p">)</span>
+    <span class="n">mylonm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lonm</span><span class="p">)</span>
+    <span class="n">mtemp</span> <span class="o">=</span> <span class="n">modeldata</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">modeldata</span>
+    <span class="k">print</span> <span class="s1">&#39;END Get lat and lon grid from ROMS nowcast&#39;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+
+    <span class="k">print</span> <span class="s1">&#39;START: Create land mask from satellite temp data&#39;</span>
+    <span class="n">myjunk</span> <span class="o">=</span> <span class="n">mtemp</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">myjunk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">myjunk</span><span class="p">)</span>
+    <span class="n">themask</span> <span class="o">=</span> <span class="n">myjunk</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">del</span> <span class="n">myjunk</span>
+    <span class="c1"># convert from boolien to 1 and 0&#39;s</span>
+    <span class="n">themask</span> <span class="o">=</span> <span class="n">themask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># write everything to the terminal</span>
+    <span class="k">print</span> <span class="s1">&#39;END: Create land mask from satellite temp data&#39;</span>
+
+    <span class="k">print</span> <span class="s2">&quot;START: Get bands from the L3 files and write to netCDF&quot;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="n">successorfail</span> <span class="o">=</span> <span class="n">get_bands_4</span><span class="p">(</span><span class="n">mylatm</span><span class="p">,</span> <span class="n">mylonm</span><span class="p">,</span> <span class="n">themask</span><span class="p">,</span>
+                                <span class="n">DATA_DIR</span><span class="p">,</span> <span class="n">EOF_WORK_DIR</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+    <span class="n">zstart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">print</span> <span class="s2">&quot;END: Get bands from the L3 files and write to netCDF&quot;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c1"># write everything to the terminal</span>
+
+    <span class="k">print</span> <span class="s2">&quot;START: Run EOF for chla, r488, r555&quot;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="n">band_prefix</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chla&#39;</span><span class="p">,</span> <span class="s1">&#39;r488&#39;</span><span class="p">,</span> <span class="s1">&#39;r555&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">band</span> <span class="ow">in</span> <span class="n">band_prefix</span><span class="p">:</span>
+        <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span> <span class="n">band</span>
+        <span class="n">status_eof</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">EOF_DIR</span><span class="p">,</span> <span class="s1">&#39;dineof&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>
+                               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BIN_DIR</span><span class="p">,</span> <span class="s2">&quot;dineof_my&quot;</span><span class="o">+</span><span class="n">band</span><span class="o">+</span><span class="s2">&quot;netcdf.init&quot;</span><span class="p">))</span>
+
+    <span class="k">print</span> <span class="s2">&quot;END: Run EOF for chla, r488, r555&quot;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s2">&quot;downsize filled data &amp; write to .nc&quot;</span>
+    <span class="k">print</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+    <span class="c1">#band_no = [1, 4, 6]</span>
+    <span class="c1">#for ii in band_no:</span>
+        <span class="c1">#[time_eof, longitude, latitude, eof_data] = geteofdata(ii, EOF_WORK_DIR)</span>
+        <span class="c1">#ds_data = downsample(eof_data, longitude, latitude, mylonm, mylatm)</span>
+        <span class="c1">#netcdfwrite(ds_data, time_eof, mylatm, mylonm, themask, ii, EOF_WORK_DIR)</span>
+        <span class="c1">#if ii == 1:</span>
+            <span class="c1">#print &#39;Chloropyll filled data written&#39;</span>
+        <span class="c1">#if ii == 4:</span>
+            <span class="c1">#print &#39;r488 filled data written&#39;</span>
+        <span class="c1">#if ii == 6:</span>
+            <span class="c1">#print &#39;r555 filled data written&#39;</span>
+        <span class="c1">#print datetime.time(datetime.now())</span>
+
+    <span class="p">[</span><span class="n">time_eof</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">eof_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">geteofdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">EOF_WORK_DIR</span><span class="p">)</span>
+    <span class="n">chl_data</span> <span class="o">=</span> <span class="n">downsample</span><span class="p">(</span><span class="n">eof_data</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">mylonm</span><span class="p">,</span> <span class="n">mylatm</span><span class="p">)</span>
+    <span class="n">chl_data</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">masked_where</span><span class="p">(</span><span class="n">chl_data</span> <span class="o">&gt;</span> <span class="mf">9000.0</span><span class="p">,</span><span class="n">chl_data</span><span class="p">)</span>
+    <span class="n">chl_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">chl_data</span><span class="p">)</span>
+    <span class="n">chl_data</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">chl_data</span><span class="p">,</span> <span class="n">fill_value</span> <span class="o">=</span> <span class="mf">9999.0</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="n">time_eof</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">eof_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">geteofdata</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">EOF_WORK_DIR</span><span class="p">)</span>
+    <span class="n">r488_data</span> <span class="o">=</span> <span class="n">downsample</span><span class="p">(</span><span class="n">eof_data</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">mylonm</span><span class="p">,</span> <span class="n">mylatm</span><span class="p">)</span>
+
+    <span class="p">[</span><span class="n">time_eof</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">eof_data</span><span class="p">]</span> <span class="o">=</span> <span class="n">geteofdata</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">EOF_WORK_DIR</span><span class="p">)</span>
+    <span class="n">r555_data</span> <span class="o">=</span> <span class="n">downsample</span><span class="p">(</span><span class="n">eof_data</span><span class="p">,</span> <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span><span class="p">,</span> <span class="n">mylonm</span><span class="p">,</span> <span class="n">mylatm</span><span class="p">)</span>
+
+    <span class="k">del</span> <span class="n">eof_data</span>
+
+    <span class="n">write_filled_nc</span><span class="p">(</span><span class="n">chl_data</span><span class="p">,</span> <span class="n">r488_data</span><span class="p">,</span> <span class="n">r555_data</span><span class="p">,</span> <span class="n">time_eof</span><span class="p">,</span> <span class="n">mylatm</span><span class="p">,</span> <span class="n">mylonm</span><span class="p">,</span> <span class="n">themask</span><span class="p">,</span> <span class="n">EOF_WORK_DIR</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s1">&#39;END PRE-NOWCAST SCRIPT&#39;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step3__codedoc_fn.html"
+                        title="previous chapter">EOF Gap-Filling Script Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step3_fn.html"
+                        title="next chapter">EOF Gap-Filling Accessory Modules Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step3_code.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_fn.html" title="EOF Gap-Filling Accessory Modules Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step3__codedoc_fn.html" title="EOF Gap-Filling Script Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

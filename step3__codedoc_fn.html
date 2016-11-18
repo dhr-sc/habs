@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>EOF Gap-Filling Script Documentation &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="EOF Gap-0Filling Script Code" href="step3_code.html" />
+    <link rel="prev" title="NASA Download Script Code" href="step2_code.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_code.html" title="EOF Gap-0Filling Script Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step2_code.html" title="NASA Download Script Code"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-filled_satellite_data">
+<span id="eof-gap-filling-script-documentation"></span><h1>EOF Gap-Filling Script Documentation<a class="headerlink" href="#module-filled_satellite_data" title="Permalink to this headline">¶</a></h1>
+<p><strong>EOF gap filling script for HABS satellite data</strong></p>
+<dl class="docutils">
+<dt><strong>Description</strong></dt>
+<dd><div class="first line-block">
+<div class="line">Main script to process HABS satellite data for use in the HABS NowCast model.</div>
+<div class="line">The body of the script:</div>
+</div>
+<ul class="simple">
+<li>Imports the python and custom modules</li>
+<li>Sets the directory paths</li>
+<li>Sets the date objects</li>
+</ul>
+<p>The main() function:</p>
+<ul class="last simple">
+<li>Assembles satellite data for the DINEOF runs</li>
+<li>Runs DINEOF gap filling</li>
+<li>Downsamples the filled data to ROMS resolution</li>
+<li>Saves the data as netCDF4, puts a copy in a web-accessible location, and archives the data.</li>
+</ul>
+</dd>
+<dt><strong>Usage</strong></dt>
+<dd>python filled_satellite_data DATA_DIR EOF_WORK_DIR EOF_DIR BIN_DIR EOF_DATA_DIR PYTHON_DIR LOG_DIR</dd>
+</dl>
+<p><strong>Args</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li>DATA_DIR: location of satellite data directory</li>
+<li>EOF_WORK_DIR: location of work directory</li>
+<li>EOF_DIR: location of DINEOF software</li>
+<li>BIN_DIR: location of python and dineof scripts</li>
+<li>EOF_DATA_DIR: location of</li>
+<li>PYTHON_DIR LOG_DIR: location of python</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt><strong>Development software versions</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Mac OSX, version 10.11.3</div>
+<div class="line">Python 2.7.11 :: Anaconda 2.4.0</div>
+</div>
+</dd>
+</dl>
+<p><strong>Python module dependencies</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li>datetime</li>
+<li>time</li>
+<li>numpy</li>
+<li>os</li>
+<li>pydap</li>
+<li>sys</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt><strong>Python library dependencies</strong></dt>
+<dd><ul class="first last simple">
+<li>habs_lib_prenowcast.get_bands_4</li>
+<li>habs_lib_prenowcast.geteofdata</li>
+<li>habs_lib_prenowcast.downsample</li>
+<li>habs_lib_prenowcast.write_filled_nc</li>
+<li>habs_lib_prenowcast.netcdfwrite</li>
+</ul>
+</dd>
+<dt><strong>Creator</strong></dt>
+<dd>Dale Robinson, CoastWatch WCRN</dd>
+<dt><strong>History</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Modified Nov. 2015 from a script by Fred Barr (CeNCOOS) </div>
+<div class="line">Modified for new (mini) server March 2016</div>
+<div class="line">Added Sphinx documentation April 2016</div>
+</div>
+</dd>
+</dl>
+<dl class="function">
+<dt id="filled_satellite_data.main">
+<code class="descclassname">filled_satellite_data.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#filled_satellite_data.main" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Main function for EOF gap filling script</strong></p>
+<dl class="docutils">
+<dt><strong>Description</strong></dt>
+<dd><p class="first">The main function has 4 major steps:</p>
+<ol class="last arabic simple">
+<li><strong>Data Assembly</strong>: The script assembles chlorophyll, rf488, and rf555 data for the last 180 days and saves them into separate netCDF3 file along with a land mask.</li>
+<li><strong>DINEOF Gap Filling</strong>: A DINEOF is run on the chlorophyll, rf488, and rf555 data stored in the netCDF3 file and the filled data fields are added as new variables to the netCDF3 files.</li>
+<li><strong>Downsampling</strong>: The filled fields from the netCDF files are loaded, downsampled to ROMS resolution, and stored together in a new netCDF4 file.</li>
+<li><strong>Distribution</strong>:The netCDF4 file is make available online for further processing.</li>
+</ol>
+</dd>
+<dt><strong>Outputs</strong></dt>
+<dd><ul class="first last">
+<li><p class="first">final product - netCDF4 file with 180 days of filled chlorophyll, rf488, and rf555 data fields</p>
+</li>
+<li><dl class="first docutils">
+<dt>intermediate products</dt>
+<dd><div class="first last line-block">
+<div class="line">L2b gridded daily files containing raw chlorophyll, rf488, and rf555 data</div>
+<div class="line">L3 gridded daily files for each band</div>
+<div class="line">netCFD3 file containing raw and filled chlorophyll, rf488, and rf555 data fields and land mask       </div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step2_code.html"
+                        title="previous chapter">NASA Download Script Code</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step3_code.html"
+                        title="next chapter">EOF Gap-0Filling Script Code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step3__codedoc_fn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_code.html" title="EOF Gap-0Filling Script Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step2_code.html" title="NASA Download Script Code"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>EOF Gap-Filling Accessory Modules Documentation &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="EOF Gap-Filling Accessory Modules Code" href="step3_lib.html" />
+    <link rel="prev" title="EOF Gap-Filling Script Code" href="step3_code.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_lib.html" title="EOF Gap-Filling Accessory Modules Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step3_code.html" title="EOF Gap-Filling Script Code"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-habs_lib_prenowcast">
+<span id="eof-gap-filling-accessory-modules-documentation"></span><h1>EOF Gap-Filling Accessory Modules Documentation<a class="headerlink" href="#module-habs_lib_prenowcast" title="Permalink to this headline">¶</a></h1>
+<p><strong>Library of functions for processing HABs satellite data</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>This module library supports the processing of satellite data
+for Phase 2 of NASA grant #NNX14AC42G, &#8220;Merging Satellite and
+Numerical Model Data in the California Current to Create Continuous
+Imagery and Forecasts of Harmful Algal Blooms.&#8221;</dd>
+<dt><strong>Python module dependencies</strong></dt>
+<dd><ul class="first last simple">
+<li>netCDF4</li>
+<li>numpy</li>
+<li>pdb</li>
+<li>os</li>
+<li>datetime</li>
+<li>time</li>
+<li>scipy</li>
+<li>subprocess</li>
+<li>glob</li>
+<li>math</li>
+<li>paramiko</li>
+<li>sys</li>
+</ul>
+</dd>
+<dt><strong>Creator</strong></dt>
+<dd>Dale Robinson, CoastWatch WCRN</dd>
+<dt><strong>History</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Most functions modified Nov. 2015 from functions by Fred Barr (CeNCOOS)</div>
+<div class="line">Modified for new (mini) server March 2016</div>
+<div class="line">Added Sphinx documentation April 2016</div>
+</div>
+</dd>
+<dt><strong>Development software versions</strong></dt>
+<dd><ul class="first last simple">
+<li>Mac OSX, version 10.11.3</li>
+<li>Python 2.7.11 :: Anaconda 2.4.0</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="habs_lib_prenowcast.get_satfiles_list">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">get_satfiles_list</code><span class="sig-paren">(</span><em>L3_DIR</em>, <em>sftpURL</em>, <em>dmzDest</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.get_satfiles_list" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to generate list of fiules to process</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Makes a list of satellite files on thredds1 that meet the search
+criteria and compares it to the list of files already created from the
+satellite files on thredds1. Returns a list of files that have not
+been processed.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>get_satfiles_list(L3_DIR, sftpURL, dmzDest)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>L3_DIR (str):</li>
+<li>sftpURL (str): URL to thredds1</li>
+<li>dmzDest (str): thredds1 directory containing</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd>raw_filelist (list of str): list of files that have not been processed</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.get_bands_4">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">get_bands_4</code><span class="sig-paren">(</span><em>model_lat</em>, <em>model_lon</em>, <em>modelmask</em>, <em>dataDir</em>, <em>dineofWorkDir</em>, <em>now</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.get_bands_4" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to aggregates satellite data</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>The function aggregates L3 chl, r488 and r555 band data from now and
+back 180 days into a single netCDF3 file along with a land mask.
+It handles newer netCDF and  older hdf input files.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>get_bands_4(model_lat, model_lon, modelmask, dataDir, dineofWorkDir, now)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>model_lat (vector): Lats from the ROMS model</li>
+<li>model_lon (vector): Lons from the ROMS model</li>
+<li>modelmask (array): Land mask from the ROMS model</li>
+<li>dataDir (str): Dir where L# band files are stored</li>
+<li>dineofWorkDir(str): Output directory</li>
+<li>now (date object):</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd>bool: True if successful</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.getfilelist">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">getfilelist</code><span class="sig-paren">(</span><em>dataDir</em>, <em>now</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.getfilelist" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to list required files for processing</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>The function list L3 band files in the data dir and then filters
+on the file name to select files going back 180 days from &#8220;now&#8221;.
+Selected file names are sorted into separate arrays for r488nm,
+r555nm and chl. The arrays are returned to the calling function.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>getfilelist(dataDir,now)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>dataDir (str): dir where L3 band files are stored</li>
+<li>now (date object): date of most recent file</li>
+</ul>
+</dd>
+<dt><strong>Changes:</strong></dt>
+<dd>This function eliminates returning the sequence info on the matrices.
+The sequence info is still generated in the function but are not used.</dd>
+<dt><strong>Returns:</strong></dt>
+<dd><ul class="first last simple">
+<li>myfiles488: Array of 180 days of r488nm band L3 file names</li>
+<li>myfiles555: Array of 180 days of r555nm band L3 file names</li>
+<li>myfileschl: Array of 180 days of chlorophyll band L3 file names</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.meanVar">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">meanVar</code><span class="sig-paren">(</span><em>mean</em>, <em>num</em>, <em>obs</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.meanVar" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to generate multi-day 2D data composites</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Generalized mean variance function to create a multi-day
+2D data composite</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>meanVar(mean, num, obs)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>mean (2D array): running mean</li>
+<li>num (2D array): count of number of observations arraygoing into         each cell of the mean</li>
+<li>obs (2D array): new data to add to the mean array</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.genmask">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">genmask</code><span class="sig-paren">(</span><em>lon</em>, <em>lat</em>, <em>model_lon</em>, <em>model_lat</em>, <em>modelmask</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.genmask" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to generate a land mask</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Creates the land mask for at MODIS full (1 km) resolution</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>genmask(lon, lat, model_lon, model_lat, modelmask)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>lon (1D array): longitude vector at full resoultion for MODIS</li>
+<li>lat (1D array): latitude vector at full resoultion for MODIS</li>
+<li>model_lon (1D array): longitude vector at ROMS resoultion</li>
+<li>model_lat (1D array): latitude vector at ROMS resoultion</li>
+<li>modelmask (2D array): land mask for the model data</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd>satmask: the land mask for at MODIS full (1 km) resolution</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.generalncwrite2">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">generalncwrite2</code><span class="sig-paren">(</span><em>data</em>, <em>mytime</em>, <em>lat</em>, <em>lon</em>, <em>mean</em>, <em>mask</em>, <em>var</em>, <em>iapp</em>, <em>dineofWorkDir</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.generalncwrite2" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>File writing function</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Write out netCDF file containing satellite data to feed to DINEOF.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>generalncwrite2(data, mytime, lat, lon, mean, mask, var, iapp, dineofWorkDir)</dd>
+<dt><strong>Outputs</strong></dt>
+<dd>NetCDF3 file</dd>
+<dt><strong>Output variables</strong></dt>
+<dd><ul class="first last simple">
+<li>chla (3D array): chlorophyll data (latitude, longitude, time):</li>
+<li>r488 (3D array): rf488 nm  data  (latitude, longitude, time)</li>
+<li>r555 (3D array): rf555 nm data  (latitude, longitude, time)</li>
+<li>mask (2D array): land mask (latitude, longitude)</li>
+<li>latitude (1D array)</li>
+<li>longitude (1D array)</li>
+<li>time (1D array)</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.geteofdata">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">geteofdata</code><span class="sig-paren">(</span><em>var</em>, <em>datDir</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.geteofdata" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to load EOF data from a netCDF3 file into memory</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Load data from first EOF data file</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>geteofdata(var, datDir)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>var (int): integer the indicates whcih var to load</li>
+<li>datDir (str): directory where the EOF data files are stored</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd><ul class="first last simple">
+<li>time (1D array): time for each lat lon 2D array in data</li>
+<li>longitude (1D array): longitude vector</li>
+<li>latitude (1D array): latitude vector</li>
+<li>data (3D array): data array (time, latitude, longitude)</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.downsample">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">downsample</code><span class="sig-paren">(</span><em>data</em>, <em>xorig</em>, <em>yorig</em>, <em>xnew</em>, <em>ynew</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.downsample" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Function to downsample satellite data to a lower resolution</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Downsample EOF data from Modis full resolution to ROMS resolution</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>downsample(data, xorig, yorig, xnew, ynew)</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>data (3D array):</li>
+<li>xorig (1D array): longitude vector at full MODIS resolution</li>
+<li>yorig (1D array): latitude vector at full MODIS resolution</li>
+<li>xnew (1D array): longitude vector at ROMS resolution</li>
+<li>ynew (1D array): latitude vector at ROMS resolution</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd>newdata: the downsampled data</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="habs_lib_prenowcast.write_filled_nc">
+<code class="descclassname">habs_lib_prenowcast.</code><code class="descname">write_filled_nc</code><span class="sig-paren">(</span><em>chldata</em>, <em>f488data</em>, <em>f555data</em>, <em>mytime</em>, <em>mylat</em>, <em>mylon</em>, <em>mymask</em>, <em>dineofWorkDir</em><span class="sig-paren">)</span><a class="headerlink" href="#habs_lib_prenowcast.write_filled_nc" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>File writing function</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>The function writes the final netCDF file that will be passed
+to S4 for processing.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd><dl class="first last docutils">
+<dt>write_filled_nc(chldata, f488data, f555data, mytime, mylat, mylon,</dt>
+<dd>mymask, dineofWorkDir):</dd>
+</dl>
+</dd>
+<dt><strong>Args:</strong></dt>
+<dd><ul class="first last simple">
+<li>chldata (3D array)</li>
+<li>f488data (3D array)</li>
+<li>f555data (3D array)</li>
+<li>mytime (vector): Days of data in 3D arrays</li>
+<li>mylat (vector): Latitudes</li>
+<li>mylon (vector): Latitudes</li>
+<li>mymask (2D array): Land mask</li>
+<li>dineofWorkDir (str): Output directory</li>
+</ul>
+</dd>
+<dt><strong>Returns:</strong></dt>
+<dd>none</dd>
+<dt><strong>Outputs</strong></dt>
+<dd>NetCDF4 file</dd>
+<dt><strong>Output variables</strong></dt>
+<dd><ul class="first last simple">
+<li>chla_filled (latitude, longitude, time)</li>
+<li>r488_filled (latitude, longitude, time)</li>
+<li>r555_filled (latitude, longitude, time)</li>
+<li>mask (latitude, longitude)</li>
+<li>latitude</li>
+<li>longitude</li>
+<li>time</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step3_code.html"
+                        title="previous chapter">EOF Gap-Filling Script Code</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step3_lib.html"
+                        title="next chapter">EOF Gap-Filling Accessory Modules Code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step3_fn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3_lib.html" title="EOF Gap-Filling Accessory Modules Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step3_code.html" title="EOF Gap-Filling Script Code"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NASA Download Script Documentation &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="NASA Download Script Code" href="step1_code.html" />
+    <link rel="prev" title="Satellite Data Processing" href="hab_project.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step1_code.html" title="NASA Download Script Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="hab_project.html" title="Satellite Data Processing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ftpHabsNasa">
+<span id="nasa-download-script-documentation"></span><h1>NASA Download Script Documentation<a class="headerlink" href="#module-ftpHabsNasa" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt><strong>Description</strong></dt>
+<dd>The script ftpHabsNasa.py lists the MODIS OC files available from
+R. Kudela&#8217;s NASA subscription FTP site. This list is compared to the
+files stored on the CoastWatch THREDDS server. Files not on THREDDS are
+downloaded to a CoastWatch web-facing server and then are scp&#8217;ed to THREDDS.</dd>
+<dt><strong>Usage</strong></dt>
+<dd>python ftpHabsNasa()</dd>
+<dt><strong>Args</strong></dt>
+<dd>none</dd>
+<dt><strong>Development software versions</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Mac OSX, version 10.11.3</div>
+<div class="line">Python 2.7.11 :: Anaconda 2.4.0</div>
+</div>
+</dd>
+</dl>
+<p><strong>Python module dependencies</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li>subprocess</li>
+<li>os</li>
+<li>paramiko</li>
+<li>datetime.date</li>
+<li>datetime.timedelta</li>
+<li>datetime.datetime</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt><strong>Creator</strong></dt>
+<dd>Dale Robinson, CoastWatch WCRN</dd>
+<dt><strong>History</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Created Nov. 2015</div>
+<div class="line">Modified for new (mini) server March 2016</div>
+<div class="line">Added Sphinx documentation April 2016</div>
+</div>
+</dd>
+</dl>
+<dl class="function">
+<dt id="ftpHabsNasa.main">
+<code class="descclassname">ftpHabsNasa.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ftpHabsNasa.main" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt><strong>Description</strong></dt>
+<dd>main() function for the ftpHabsNasa.py script</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="hab_project.html"
+                        title="previous chapter">Satellite Data Processing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step1_code.html"
+                        title="next chapter">NASA Download Script Code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step1_fn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step1_code.html" title="NASA Download Script Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="hab_project.html" title="Satellite Data Processing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SEADAS-Based Functions Code &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="EOF Gap-Filling Script Documentation" href="step3__codedoc_fn.html" />
+    <link rel="prev" title="SEADAS-Based Functions Documentation" href="step2_fn.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3__codedoc_fn.html" title="EOF Gap-Filling Script Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step2_fn.html" title="SEADAS-Based Functions Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="seadas-based-functions-code">
+<h1>SEADAS-Based Functions Code<a class="headerlink" href="#seadas-based-functions-code" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;**Library of SEADAS-related functions for processing HABs satellite data**</span>
+
+<span class="sd">**Description:**</span>
+<span class="sd">    This module library supports the processing of satellite data</span>
+<span class="sd">    for Phase 2 of NASA grant #NNX14AC42G, &quot;Merging Satellite and</span>
+<span class="sd">    Numerical Model Data in the California Current to Create Continuous </span>
+<span class="sd">    Imagery and Forecasts of Harmful Algal Blooms.&quot; Only the function that </span>
+<span class="sd">    use SEADAS programs are included in the library. </span>
+<span class="sd">    </span>
+<span class="sd">**Python module dependencies**</span>
+<span class="sd">    * os</span>
+<span class="sd">    * subprocess</span>
+<span class="sd">    * glob</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">makeL2bFile</span><span class="p">(</span><span class="n">filePrefix</span><span class="p">,</span><span class="n">dataDir</span><span class="p">,</span><span class="n">seadasDir</span><span class="p">,</span><span class="n">l2bDir</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;**Function to process swath data to L2b gridded daily files**</span>
+
+<span class="sd">    **Description:**</span>
+<span class="sd">    	Processes MODIS ocean color files to daily L2b files</span>
+
+<span class="sd">	**Usage:**</span>
+<span class="sd">		makeL2bFile(filePrefix,dataDir,seadasDir,l2bDir)</span>
+
+<span class="sd">    **Args:**</span>
+<span class="sd">        * dataDir (str): dir where source MODIS files are stored</span>
+<span class="sd">        * l2bDir (str): directory where output files are written</span>
+<span class="sd">        * filePrefix (str): string to search for source file</span>
+<span class="sd">        * seadasDir (str): location of SEASDAS</span>
+<span class="sd">        </span>
+<span class="sd">    **Dependencies**</span>
+<span class="sd">    	SEADAS l2bin</span>
+
+<span class="sd">    **Outputs**</span>
+<span class="sd">        NetCDF4 file with L2b gridded data</span>
+<span class="sd">        </span>
+<span class="sd">    **Output variables**</span>
+<span class="sd">        * chla (latitude, longitude)</span>
+<span class="sd">        * rf488 (latitude, longitude)</span>
+<span class="sd">        * rf555 (latitude, longitude)</span>
+
+<span class="sd">    **Creator**</span>
+<span class="sd">        Dale Robinson, CoastWatch WCRN</span>
+
+<span class="sd">    **History**</span>
+<span class="sd">        | Created Nov. 2015 </span>
+<span class="sd">        | Modified for new (mini) server March 2016</span>
+<span class="sd">        | Added Sphinx documentation April 2016</span>
+<span class="sd">        </span>
+<span class="sd">    **Development software versions**</span>
+<span class="sd">        * Mac OSX, version 10.11.3</span>
+<span class="sd">        * Python 2.7.11 :: Anaconda 2.4.0</span>
+<span class="sd">        * SEADAS L2BIN 4.0.3 </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+    <span class="kn">import</span> <span class="nn">glob</span>
+    
+    <span class="k">print</span> <span class="s1">&#39;Create list of files to include in the L2b file&#39;</span>
+    <span class="k">print</span> <span class="s1">&#39;from this dir &#39;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    <span class="n">dirList</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;*&#39;</span><span class="p">))</span> <span class="c1"># the search paramters need to change</span>
+    <span class="k">print</span> <span class="n">dirList</span><span class="p">,</span> <span class="s1">&#39;L2b files&#39;</span><span class="p">,</span> <span class="n">filePrefix</span>
+    <span class="k">print</span> <span class="n">dataDir</span>
+    <span class="n">fileList</span> <span class="o">=</span> <span class="s1">&#39;file_list.txt&#39;</span>
+    <span class="n">dirList</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dirList</span> <span class="k">if</span> <span class="s2">&quot;L2_LAC.&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">];</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dirList</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">fileList</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">dirList</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fl</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">print</span> <span class="s1">&#39;Include these files: &#39;</span><span class="p">,</span> <span class="n">dirList</span>
+        <span class="k">print</span> <span class="s1">&#39;Make L2b file&#39;</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seadasDir</span><span class="p">,</span><span class="s1">&#39;l2bin&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; infile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">fileList</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; ofile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; resolve=1 prodtype=</span><span class="se">\&#39;</span><span class="s2">regional</span><span class="se">\&#39;</span><span class="s2"> l3bprod=</span><span class="se">\&#39;</span><span class="s2">chlor_a Rrs_488 Rrs_555</span><span class="se">\&#39;</span><span class="s2"> oformat=</span><span class="se">\&quot;</span><span class="s2">netCDF4</span><span class="se">\&quot;</span><span class="s2"> verbose=</span><span class="se">\&quot;</span><span class="s2">1</span><span class="se">\&quot;</span><span class="s2">&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s2">&quot;No L2 Files are available to process in &quot;</span><span class="o">+</span><span class="n">dataDir</span>
+
+<span class="k">def</span> <span class="nf">makeL3Files</span><span class="p">(</span><span class="n">filePrefix</span><span class="p">,</span><span class="n">seadasDir</span><span class="p">,</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">l3Dir</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;**Function to convert L2b gridded daily files to L3 gridded daily files for each band**</span>
+<span class="sd">    </span>
+<span class="sd">    **Description:**</span>
+<span class="sd">        Processes L2b files to L3 files that contain the individual band data</span>
+
+<span class="sd">    **Usage:**</span>
+<span class="sd">        makeL3Files(filePrefix,seadasDir,l2bDir,l3Dir)</span>
+
+<span class="sd">    **Args:**</span>
+<span class="sd">        * filePrefix (str): string to search for source file</span>
+<span class="sd">        * seadasDir (str): location of SEASDAS</span>
+<span class="sd">        * l2bDir (str): directory where input files are stored</span>
+<span class="sd">        * l3Dir (str): directory where output files are written</span>
+
+<span class="sd">    **Outputs**</span>
+<span class="sd">        NetCDF4 file</span>
+
+<span class="sd">    **Dependencies**</span>
+<span class="sd">        SEADAS l3mapgen</span>
+
+<span class="sd">    **Creator**</span>
+<span class="sd">        Dale Robinson, CoastWatch WCRN</span>
+
+<span class="sd">    **History**</span>
+<span class="sd">        | Created Nov. 2015 </span>
+<span class="sd">        | Modified for new (mini) server March 2016</span>
+<span class="sd">        | Added Sphinx documentation April 2016</span>
+<span class="sd">        </span>
+<span class="sd">    **Development software versions**</span>
+<span class="sd">        * Mac OSX, version 10.11.3</span>
+<span class="sd">        * Python 2.7.11 :: Anaconda 2.4.0      </span>
+<span class="sd">        * SEADAS l3mapgen 1.0.1 </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+    <span class="kn">import</span> <span class="nn">glob</span>
+    
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)):</span>
+        <span class="k">print</span> <span class="s1">&#39;Make L3 488 file&#39;</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seadasDir</span><span class="p">,</span><span class="s1">&#39;l3mapgen&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;  ifile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot; ofile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l3Dir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;_488.nc&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; product=</span><span class="se">\&quot;</span><span class="s2">Rrs_488</span><span class="se">\&quot;</span><span class="s2"> resolution=</span><span class="se">\&quot;</span><span class="s2">1km</span><span class="se">\&quot;</span><span class="s2"> oformat=</span><span class="se">\&quot;</span><span class="s2">netcdf4</span><span class="se">\&quot;</span><span class="s2"> south=31.3 north=43.01 east=-117.0 west=-127.5&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s1">&#39;Make L3 555 file&#39;</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seadasDir</span><span class="p">,</span><span class="s1">&#39;l3mapgen&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;  ifile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot; ofile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l3Dir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;_555.nc&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; product=</span><span class="se">\&quot;</span><span class="s2">Rrs_555</span><span class="se">\&quot;</span><span class="s2"> resolution=</span><span class="se">\&quot;</span><span class="s2">1km</span><span class="se">\&quot;</span><span class="s2"> oformat=</span><span class="se">\&quot;</span><span class="s2">netcdf4</span><span class="se">\&quot;</span><span class="s2"> south=31.3 north=43.01 east=-117.0 west=-127.5&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s1">&#39;Make L3 Chl_a file&#39;</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seadasDir</span><span class="p">,</span><span class="s1">&#39;l3mapgen&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;  ifile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)</span><span class="o">+</span> <span class="s2">&quot; ofile=&quot;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l3Dir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;_chlora.nc&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; product=</span><span class="se">\&quot;</span><span class="s2">chlor_a</span><span class="se">\&quot;</span><span class="s2"> resolution=</span><span class="se">\&quot;</span><span class="s2">1km</span><span class="se">\&quot;</span><span class="s2"> oformat=</span><span class="se">\&quot;</span><span class="s2">netcdf4</span><span class="se">\&quot;</span><span class="s2"> south=31.3 north=43.01 east=-117.0 west=-127.5&quot;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="s1">&#39;rm &#39;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l2bDir</span><span class="p">,</span><span class="n">filePrefix</span><span class="o">+</span><span class="s1">&#39;.L2b.nc&#39;</span><span class="p">)</span>
+        <span class="c1">#subprocess.call(myCmd, shell=True)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s2">&quot;The L2b file &quot;</span><span class="o">+</span><span class="n">filePrefix</span><span class="o">+</span><span class="s2">&quot;.L2b.nc is not available in the directory &quot;</span><span class="o">+</span><span class="n">l2bDir</span>
+
+
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step2_fn.html"
+                        title="previous chapter">SEADAS-Based Functions Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step3__codedoc_fn.html"
+                        title="next chapter">EOF Gap-Filling Script Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step2_code.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step3__codedoc_fn.html" title="EOF Gap-Filling Script Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step2_fn.html" title="SEADAS-Based Functions Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

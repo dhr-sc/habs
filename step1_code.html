@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NASA Download Script Code &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="SEADAS-Based Functions Documentation" href="step2_fn.html" />
+    <link rel="prev" title="NASA Download Script Documentation" href="step1_fn.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step2_fn.html" title="SEADAS-Based Functions Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step1_fn.html" title="NASA Download Script Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nasa-download-script-code">
+<h1>NASA Download Script Code<a class="headerlink" href="#nasa-download-script-code" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span class="ch">#! /usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">**Description**</span>
+<span class="sd">    The script ftpHabsNasa.py lists the MODIS OC files available from</span>
+<span class="sd">    R. Kudela&#39;s NASA subscription FTP site. This list is compared to the</span>
+<span class="sd">    files stored on the CoastWatch THREDDS server. Files not on THREDDS are</span>
+<span class="sd">    downloaded to a CoastWatch web-facing server and then are scp&#39;ed to THREDDS.</span>
+
+<span class="sd">**Usage**</span>
+<span class="sd">	python ftpHabsNasa()</span>
+
+<span class="sd">**Args**</span>
+<span class="sd">    none</span>
+
+<span class="sd">**Development software versions**</span>
+<span class="sd">    | Mac OSX, version 10.11.3</span>
+<span class="sd">    | Python 2.7.11 :: Anaconda 2.4.0</span>
+
+<span class="sd">**Python module dependencies**</span>
+
+<span class="sd">    * subprocess</span>
+<span class="sd">    * os</span>
+<span class="sd">    * paramiko</span>
+<span class="sd">    * datetime.date</span>
+<span class="sd">    * datetime.timedelta</span>
+<span class="sd">    * datetime.datetime</span>
+
+<span class="sd">**Creator**</span>
+<span class="sd">    Dale Robinson, CoastWatch WCRN</span>
+
+<span class="sd">**History**</span>
+<span class="sd">    | Created Nov. 2015</span>
+<span class="sd">    | Modified for new (mini) server March 2016</span>
+<span class="sd">    | Added Sphinx documentation April 2016</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">paramiko</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">datetime</span>
+
+<span class="c1"># Set up directories</span>
+<span class="c1"># work dir to process downloaded file </span>
+<span class="n">dataDir</span> <span class="o">=</span> <span class="s2">&quot;/Users/cwatch/habs/nasawork&quot;</span>
+<span class="c1"># dir path on server to store files </span>
+<span class="n">dmzDest</span> <span class="o">=</span> <span class="s2">&quot;/u00/satellite/MW/habs/raw&quot;</span>
+<span class="c1"># destination server url</span>
+<span class="n">sftpURL</span>   <span class="o">=</span> <span class="s1">&#39;192.168.31.27&#39;</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    **Description**</span>
+<span class="sd">        main() function for the ftpHabsNasa.py script</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">count</span> <span class="o">&lt;</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ssh</span> <span class="o">=</span> <span class="n">paramiko</span><span class="o">.</span><span class="n">SSHClient</span><span class="p">()</span>
+            <span class="n">ssh</span><span class="o">.</span><span class="n">load_system_host_keys</span><span class="p">()</span>
+            <span class="n">ssh</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">sftpURL</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s2">&quot;cwatch&quot;</span><span class="p">)</span>
+            <span class="c1"># make list of files we have on the thredds server</span>
+            <span class="k">print</span> <span class="s1">&#39;get list of files on thredds1&#39;</span>
+            <span class="n">ftp</span> <span class="o">=</span> <span class="n">ssh</span><span class="o">.</span><span class="n">open_sftp</span><span class="p">()</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dmzDest</span><span class="p">)</span>
+            <span class="n">tds1Files</span> <span class="o">=</span> <span class="n">ftp</span><span class="o">.</span><span class="n">listdir</span><span class="p">()</span>  <span class="c1"># obtain file list</span>
+            <span class="n">ftp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">ssh</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>	
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">wait</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="n">count</span>  <span class="c1"># progressive increase in wait time</span>
+            <span class="k">print</span> <span class="s1">&#39;waiting to retry thredds1&#39;</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        
+    <span class="c1"># pull dates from file names and find last day</span>
+    <span class="n">fileValue</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">fl</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span> <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">tds1Files</span><span class="p">]</span>
+    <span class="n">maxFile</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">fileValue</span><span class="p">)</span>
+    <span class="n">maxFileStr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">maxFile</span><span class="p">)</span>
+    <span class="n">maxYear</span> <span class="o">=</span> <span class="n">maxFileStr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">maxDoy</span> <span class="o">=</span> <span class="n">maxFileStr</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+    <span class="n">maxDate</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">maxYear</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">maxDoy</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">dataDir</span><span class="p">)</span>
+
+    <span class="c1"># check last 5 days on NASA ftp for files missing on thredds1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">fileDate</span> <span class="o">=</span> <span class="n">maxDate</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="n">searcStr</span> <span class="o">=</span> <span class="n">fileDate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">fileDate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%j&#39;</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s1">&#39;search string&#39;</span><span class="p">,</span> <span class="n">searcStr</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="n">fileDate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">)</span>
+        <span class="n">doy</span> <span class="o">=</span> <span class="n">fileDate</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%j&#39;</span><span class="p">)</span>
+        <span class="c1"># download missing files</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="s1">&#39;wget -nd -N -r -l1 --no-parent -A </span><span class="se">\&quot;</span><span class="s1">*&#39;</span><span class="o">+</span><span class="n">searcStr</span><span class="o">+</span><span class="s1">&#39;*</span><span class="se">\&quot;</span><span class="s1"> -R.png ftp://samoa.gsfc.nasa.gov/subscriptions/MODISA/XM/raphael/2435/&#39;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c1"># scp downloaded files to thredds1</span>
+    <span class="k">print</span> <span class="s1">&#39;transfer downloaded files to thredds1&#39;</span>
+    <span class="n">dirList</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dataDir</span><span class="p">)</span>
+    <span class="n">dirList</span> <span class="o">=</span> <span class="p">[</span><span class="n">fl</span> <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">dirList</span> <span class="k">if</span> <span class="s1">&#39;CeNCOOS.nc&#39;</span> <span class="ow">in</span> <span class="n">fl</span><span class="p">]</span>
+    <span class="n">dirList</span> <span class="o">=</span> <span class="p">[</span><span class="n">fl</span> <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">dirList</span> <span class="k">if</span> <span class="n">fl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tds1Files</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">fl</span> <span class="ow">in</span> <span class="n">dirList</span><span class="p">:</span>
+        <span class="n">myCmd</span> <span class="o">=</span> <span class="s1">&#39;scp &#39;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span><span class="n">fl</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; cwatch@192.168.31.27:&#39;</span><span class="o">+</span><span class="n">dmzDest</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">fl</span><span class="p">,</span> <span class="s1">&#39;scp to thredds1&#39;</span>
+
+    <span class="c1"># clean up work dir</span>
+    <span class="n">myCmd</span> <span class="o">=</span> <span class="s1">&#39;rm &#39;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataDir</span><span class="p">,</span> <span class="s2">&quot;*.nc&quot;</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">myCmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step1_fn.html"
+                        title="previous chapter">NASA Download Script Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step2_fn.html"
+                        title="next chapter">SEADAS-Based Functions Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/step1_code.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step2_fn.html" title="SEADAS-Based Functions Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step1_fn.html" title="NASA Download Script Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

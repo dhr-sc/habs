@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Satellite Data Processing &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="next" title="NASA Download Script Documentation" href="step1_fn.html" />
+    <link rel="prev" title="HABS Forecast Model’s Documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step1_fn.html" title="NASA Download Script Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="HABS Forecast Model’s Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="satellite-data-processing">
+<h1>Satellite Data Processing<a class="headerlink" href="#satellite-data-processing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>CoastWatch generates files containing gap-free satellite data fields for use in the HABS NowCast and ForeCast model of Anderson and Kudela in support of Phase 2 of NASA grant #NNX14AC42G, “Merging Satellite and Numerical Model Data in the California Current to Create Continuous Imagery and Forecasts of Harmful Algal Blooms.” The process is broken down operationally into three basic steps:</p>
+<ol class="arabic simple">
+<li>Downloading NASA L2 files</li>
+<li>Processing the L2 files to generate gridded daily files for the chlorophyll, rf488 nm,and rf555 nm bands.</li>
+<li>Using a DINEOF routine to create gap-free data fields for chlorophyll, rf488 nm,and rf555 nm bands.</li>
+</ol>
+<p>The coordination of three steps is manage from a control script, <cite>nowcast_control.py</cite>, that progressively calls scripts and functions from a custom module library.</p>
+</div>
+<div class="section" id="step-1-downloading-nasa-l2-files">
+<h2>Step 1: Downloading NASA L2 files<a class="headerlink" href="#step-1-downloading-nasa-l2-files" title="Permalink to this headline">¶</a></h2>
+<p>The script <cite>ftpHabsNasa.py</cite> lists the MODIS OC files available from R. Kudela&#8217;s NASA subscription FTP site. This list is compared to the files stored on the CoastWatch THREDDS server. Files not on THREDDS are downloaded to a CoastWatch web facing server and then are SCP&#8217;ed to THREDDS.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="step1_fn.html">NASA download script documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step1_code.html">NASA download script code</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="step-2-gridding-and-compositing-l2-files">
+<h2>Step 2: Gridding and compositing L2 files<a class="headerlink" href="#step-2-gridding-and-compositing-l2-files" title="Permalink to this headline">¶</a></h2>
+<p>Two processes using SEADAS programs to process NASA MODIS OC files to daily gridded band files. In Step 3 the daily gridded band files are assembled fore use in a EOF gap filling routine.</p>
+<ol class="arabic simple">
+<li>In the script <cite>makeL2bFile()</cite>, swath data processed to L2B gridded, daily files using SEADAS <cite>l2bin</cite>.</li>
+<li>In the script <cite>makeL3File()</cite>, daily gridded data for each band (chlorophyll, rf488, rf555) are extracted from the L2b files and saved our as separate file using SEADAS <cite>l3mapgen</cite>.</li>
+</ol>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="step2_fn.html">SEADAS-based functions documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step2_code.html">SEADAS-based functions code</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="step-3-filling-data-gaps-with-dineof">
+<h2>Step 3: Filling data gaps with DINEOF<a class="headerlink" href="#step-3-filling-data-gaps-with-dineof" title="Permalink to this headline">¶</a></h2>
+<p>The EOF gap filling script, <cite>filled_satellite_data()</cite>, contains the following major processes:</p>
+<ol class="arabic simple">
+<li><strong>Data Assembly</strong>: The script assembles chlorophyll, rf488, and rf555 data for the last 180 days and saves them into separate netCDF3 file along with a land mask.</li>
+<li><strong>DINEOF Gap Filling</strong>: A DINEOF is run on the chlorophyll, rf488, and rf555 data stored in the netCDF3 file and the filled data fields are added as new variables to the netCDF3 files.</li>
+<li><strong>Downsampling</strong>: The filled fields from the netCDF files are loaded, downsampled to ROMS resolution, and stored together in a new netCDF4 file.</li>
+<li><strong>Distribution</strong>:The netCDF4 file is make available online for further processing.</li>
+</ol>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="step3__codedoc_fn.html">EOF gap-filling script &#8216;filled_satellite_data&#8217; documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step3_code.html">EOF gap-filling script &#8216;filled_satellite_data&#8217; code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step3_fn.html">EOF gap-filling accessory modules documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step3_lib.html">EOF gap-filling accessory modules code</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="control-script-regulates-processing-steps">
+<h2>Control script regulates processing steps<a class="headerlink" href="#control-script-regulates-processing-steps" title="Permalink to this headline">¶</a></h2>
+<p>The control script, <cite>nowcast_control.py</cite>, manages the three basic step for processing the satellite data for the HABs nowcasting and forecasting project by calling scripts and functions from a custom module library.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="control_fn.html">Control script documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_control.html">Control script code</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Satellite Data Processing</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#step-1-downloading-nasa-l2-files">Step 1: Downloading NASA L2 files</a></li>
+<li><a class="reference internal" href="#step-2-gridding-and-compositing-l2-files">Step 2: Gridding and compositing L2 files</a></li>
+<li><a class="reference internal" href="#step-3-filling-data-gaps-with-dineof">Step 3: Filling data gaps with DINEOF</a></li>
+<li><a class="reference internal" href="#control-script-regulates-processing-steps">Control script regulates processing steps</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">HABS Forecast Model&#8217;s Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="step1_fn.html"
+                        title="next chapter">NASA Download Script Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/hab_project.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="step1_fn.html" title="NASA Download Script Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="HABS Forecast Model’s Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>

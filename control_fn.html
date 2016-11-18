@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Control Script Documentation &mdash; HABS Forecast Model 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HABS Forecast Model 1.0 documentation" href="index.html" />
+    <link rel="up" title="Satellite Data Processing" href="hab_project.html" />
+    <link rel="next" title="Control Script Code" href="code_control.html" />
+    <link rel="prev" title="EOF Gap-Filling Accessory Modules Code" href="step3_lib.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="code_control.html" title="Control Script Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="step3_lib.html" title="EOF Gap-Filling Accessory Modules Code"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" accesskey="U">Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-nowcast_control">
+<span id="control-script-documentation"></span><h1>Control Script Documentation<a class="headerlink" href="#module-nowcast_control" title="Permalink to this headline">¶</a></h1>
+<p><strong>HABS Model Control Script for Satellite Data</strong></p>
+<dl class="docutils">
+<dt><strong>Description:</strong></dt>
+<dd>Sets the directories and controls execution of the scripts used to
+process satellite data for the HABS nowcast/forecast model.</dd>
+<dt><strong>Usage:</strong></dt>
+<dd>python nowcast_control.py</dd>
+<dt><strong>Args:</strong></dt>
+<dd>none</dd>
+<dt><strong>Python module dependencies</strong></dt>
+<dd><ul class="first last simple">
+<li>os</li>
+<li>subprocess</li>
+<li>numpy</li>
+</ul>
+</dd>
+<dt><strong>Python library dependencies</strong></dt>
+<dd>habs_lib_prenowcast</dd>
+<dt><strong>Outputs</strong></dt>
+<dd>NetCDF3 file of last 180 days of EOF filled data</dd>
+<dt><strong>Output variables</strong></dt>
+<dd><ul class="first last simple">
+<li>chla_filled (3D array): EOF filled satellite chlorophyll data (latitude, longitude, time)</li>
+<li>r488_filled (3D array): EOF filled satellite rf488 nm data (latitude, longitude, time)</li>
+<li>r555_filled (3D array): EOF filled satellite rf555 nm data (latitude, longitude, time)</li>
+<li>mask (2D array): land mask (latitude, longitude)</li>
+<li>latitude (1D array)</li>
+<li>longitude (1D array)</li>
+<li>time (1D array)</li>
+</ul>
+</dd>
+<dt><strong>Development software versions</strong></dt>
+<dd><ul class="first last simple">
+<li>Mac OSX, version 10.11.3</li>
+<li>Python 2.7.11 :: Anaconda 2.4.0</li>
+</ul>
+</dd>
+<dt><strong>Creator</strong></dt>
+<dd>Dale Robinson, CoastWatch WCRN</dd>
+<dt><strong>History</strong></dt>
+<dd><div class="first last line-block">
+<div class="line">Created Nov. 2015 </div>
+<div class="line">Modified for new (mini) server March 2016</div>
+<div class="line">Added Sphinx documentation April 2016</div>
+</div>
+</dd>
+</dl>
+<dl class="function">
+<dt id="nowcast_control.main">
+<code class="descclassname">nowcast_control.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nowcast_control.main" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt><strong>Useage</strong></dt>
+<dd>main()`</dd>
+<dt><strong>Description</strong></dt>
+<dd><p class="first">Controls execution of the scripts used to process satellite data for the HABS nowcast/forecast model.</p>
+<ol class="last arabic simple">
+<li>Downloads NASA MODIS OC L2 files</li>
+<li>Process L2 files to generate gridded daily files for chlorophyll, rf488, and rf555.</li>
+<li>Fill data gaps in data using DINEOF</li>
+<li>Storage data and push to S4 processing center</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="step3_lib.html"
+                        title="previous chapter">EOF Gap-Filling Accessory Modules Code</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="code_control.html"
+                        title="next chapter">Control Script Code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/control_fn.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="code_control.html" title="Control Script Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="step3_lib.html" title="EOF Gap-Filling Accessory Modules Code"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">HABS Forecast Model 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="hab_project.html" >Satellite Data Processing</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Dr. Dale Robinson.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+    </div>
+  </body>
+</html>
