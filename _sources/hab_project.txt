@@ -1,0 +1,68 @@
+Satellite Data Processing
+=========================
+
+Overview
+--------
+CoastWatch generates files containing gap-free satellite data fields for use in the HABS NowCast and ForeCast model of Anderson and Kudela in support of Phase 2 of NASA grant #NNX14AC42G, “Merging Satellite and Numerical Model Data in the California Current to Create Continuous Imagery and Forecasts of Harmful Algal Blooms.” The process is broken down operationally into three basic steps:
+
+#. Downloading NASA L2 files
+#. Processing the L2 files to generate gridded daily files for the chlorophyll, rf488 nm,and rf555 nm bands. 
+#. Using a DINEOF routine to create gap-free data fields for chlorophyll, rf488 nm,and rf555 nm bands. 
+
+The coordination of three steps is manage from a control script, `nowcast_control.py`, that progressively calls scripts and functions from a custom module library. 
+
+
+Step 1: Downloading NASA L2 files
+---------------------------------
+
+The script `ftpHabsNasa.py` lists the MODIS OC files available from R. Kudela's NASA subscription FTP site. This list is compared to the files stored on the CoastWatch THREDDS server. Files not on THREDDS are downloaded to a CoastWatch web facing server and then are SCP'ed to THREDDS.    
+
+.. toctree::
+   :maxdepth: 2
+   
+   NASA download script documentation <step1_fn>
+   NASA download script code <step1_code>
+
+Step 2: Gridding and compositing L2 files
+-----------------------------------------
+
+Two processes using SEADAS programs to process NASA MODIS OC files to daily gridded band files. In Step 3 the daily gridded band files are assembled fore use in a EOF gap filling routine. 
+
+#. In the script `makeL2bFile()`, swath data processed to L2B gridded, daily files using SEADAS `l2bin`.
+#. In the script `makeL3File()`, daily gridded data for each band (chlorophyll, rf488, rf555) are extracted from the L2b files and saved our as separate file using SEADAS `l3mapgen`.
+
+.. toctree::
+   :maxdepth: 2
+   
+   SEADAS-based functions documentation <step2_fn>
+   SEADAS-based functions code <step2_code>
+
+Step 3: Filling data gaps with DINEOF
+-------------------------------------
+The EOF gap filling script, `filled_satellite_data()`, contains the following major processes:
+
+1. **Data Assembly**: The script assembles chlorophyll, rf488, and rf555 data for the last 180 days and saves them into separate netCDF3 file along with a land mask. 
+2. **DINEOF Gap Filling**: A DINEOF is run on the chlorophyll, rf488, and rf555 data stored in the netCDF3 file and the filled data fields are added as new variables to the netCDF3 files.
+3. **Downsampling**: The filled fields from the netCDF files are loaded, downsampled to ROMS resolution, and stored together in a new netCDF4 file. 
+4. **Distribution**:The netCDF4 file is make available online for further processing. 
+
+.. toctree::
+   :maxdepth: 2
+
+   EOF gap-filling script 'filled_satellite_data' documentation <step3__codedoc_fn>
+   EOF gap-filling script 'filled_satellite_data' code <step3_code>
+   EOF gap-filling accessory modules documentation <step3_fn>
+   EOF gap-filling accessory modules code <step3_lib>
+
+
+Control script regulates processing steps
+-----------------------------------------
+
+The control script, `nowcast_control.py`, manages the three basic step for processing the satellite data for the HABs nowcasting and forecasting project by calling scripts and functions from a custom module library. 
+
+.. toctree::
+   :maxdepth: 2
+
+   Control script documentation <control_fn>
+   Control script code <code_control>
+

@@ -1,0 +1,5 @@
+EOF Gap-Filling Accessory Modules Documentation
+===============================================
+
+.. automodule:: habs_lib_prenowcast
+   :members: get_satfiles_list, get_bands_4, getfilelist, meanVar, genmask, generalncwrite2, geteofdata, downsample, write_filled_nc

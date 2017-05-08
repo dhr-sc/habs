@@ -1,0 +1,5 @@
+Control Script Documentation
+============================
+
+.. automodule:: nowcast_control
+   :members:
